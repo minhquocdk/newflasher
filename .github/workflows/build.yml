@@ -1,0 +1,31 @@
+name: Cross-Compile Newflasher for Windows
+
+on:
+  workflow_dispatch: # Cho phép bạn bấm nút tự chạy build thủ công bất cứ lúc nào
+
+jobs:
+  build-windows-on-linux:
+    runs-on: ubuntu-latest # Chạy máy ảo Ubuntu Linux của GitHub
+
+    steps:
+    - name: Checkout mã nguồn
+      uses: actions/checkout@v4
+
+    - name: Cài đặt trình biên dịch chéo và thư viện trên Linux
+      run: |
+        sudo apt-get update
+        # Cài đặt trình biên dịch chéo sang Windows (MinGW) và các công cụ build
+        sudo apt-get install -y gcc-mingw-w64-x86-64 make
+
+    - name: Biên dịch mã nguồn ra file .exe cho Windows
+      run: |
+        # Dùng trình biên dịch chéo x86_64-w64-mingw32-gcc để tạo file thực thi Windows
+        # Thêm cờ -static để nhúng thẳng thư viện vào file exe, không bị lỗi thiếu dll khi mang về Windows
+        x86_64-w64-mingw32-gcc -O2 -static -o newflasher.exe *.c -lexpat -lz
+      continue-on-error: true
+
+    - name: Lưu trữ file .exe tự build (Artifacts)
+      uses: actions/upload-artifact@v4
+      with:
+        name: newflasher-windows-compiled-on-linux
+        path: newflasher.exe
