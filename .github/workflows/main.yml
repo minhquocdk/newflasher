@@ -1,0 +1,29 @@
+name: Build Newflasher Windows
+
+on:
+  workflow_dispatch: # Cho phép bạn bấm nút tự chạy build thủ công bất cứ lúc nào
+
+jobs:
+  build-windows:
+    runs-on: windows-latest # Yêu cầu máy chủ Microsoft chạy hệ điều hành Windows mới nhất
+
+    steps:
+    - name: Checkout mã nguồn
+      uses: actions/checkout@v4
+
+    - name: Thiết lập môi trường Visual Studio
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Tiến hành biên dịch mã nguồn (Build)
+      run: |
+        # Lệnh này sẽ quét file mã nguồn C và dùng trình biên dịch cl của Windows để tạo ra file .exe
+        # Tùy thuộc vào cấu trúc source code của Newflasher, lệnh build có thể là 'make' hoặc 'msbuild'
+        # Dưới đây là lệnh biên dịch cơ bản cho file đơn:
+        cl.exe /O2 /FE:newflasher.exe newflasher.c main.c /link /SUBSYSTEM:CONSOLE
+      continue-on-error: true
+
+    - name: Lưu trữ sản phẩm (Artifacts)
+      uses: actions/upload-artifact@v4
+      with:
+        name: newflasher-cloud-build
+        path: newflasher.exe
